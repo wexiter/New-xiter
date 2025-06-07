@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AUXILIO BY @SPEEDX</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      background: black;
+      color: white;
+    }
+    .background {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .x {
+      position: absolute;
+      color: #00bfff;
+      font-size: 20px;
+      animation: moveX 10s linear infinite;
+      opacity: 0.3;
+    }
+    @keyframes moveX {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0.1; }
+      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0.5; }
+    }
+    .panel {
+      background-color: #2c2c2c;
+      padding: 20px;
+      border-radius: 10px;
+      width: 350px;
+      margin: 50px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+      position: relative;
+      z-index: 1;
+    }
+    .title {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 15px;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      background: #3a3a3a;
+      cursor: pointer;
+    }
+    .tab.active {
+      background: #555;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .checkbox {
+      margin: 10px 0;
+    }
+    input[type="checkbox"] {
+      margin-right: 8px;
+    }
+    .slider-group {
+      margin: 15px 0;
+    }
+    .slider-group input[type="range"] {
+      width: 100%;
+    }
+    .dropdown {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      background-color: #3a3a3a;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .sub-label {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .status-box {
+      background-color: #444;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    .status-box.active {
+      background-color: #0066cc;
+    }
+    .timer {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="background" id="background"></div>
+
+  <div class="panel">
+    <div class="title">AUXILIO BY @SPEEDX</div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('aimbot')">Aimbot</div>
+      <div class="tab" onclick="showTab('info')">Info</div>
+    </div>
+
+    <!-- Aimbot Tab -->
+    <div class="tab-content active" id="tab-aimbot">
+      <div class="checkbox">
+        <label><input type="checkbox" id="aimAssistToggle"> Ativar Auxílio</label>
+      </div>
+      <div class="checkbox">
+        <label><input type="checkbox" id="precisionToggle"> Ativar Precisão</label>
+      </div>
+      <div class="checkbox">
+        <label><input type="checkbox" id="scopeAimbotToggle"> Aimbot de Mira</label>
+      </div>
+      <div class="checkbox">
+        <label><input type="checkbox" id="dpiCheckbox"> Diminuir DPI</label>
+      </div>
+      <div class="checkbox">
+        <label><input type="checkbox" id="autoShootToggle"> Auto-Tiro</label>
+      </div>
+
+      <div class="slider-group" id="autoShootSettings" style="display: none;">
+        <label>Velocidade do Tiro (ms): <span id="fireRateValue">300</span></label>
+        <input type="range" min="100" max="1000" value="300" step="50" id="fireRateSlider"
+          oninput="document.getElementById('fireRateValue').innerText = this.value">
+      </div>
+
+      <div class="checkbox" id="burstModeContainer" style="display: none;">
+        <label><input type="checkbox" id="burstFireToggle"> Modo Rajada (3 tiros)</label>
+      </div>
+
+      <div class="slider-group">
+        <label>Precisão <span id="precValue">0</span></label>
+        <input type="range" min="0" max="100" value="0" id="precisionSlider" oninput="document.getElementById('precValue').innerText = this.value">
+      </div>
+
+      <select class="dropdown" id="aimPart">
+        <option value="head">Auxílio Head</option>
+        <option value="chest">Auxílio Pecho</option>
+        <option value="neck">Auxílio Cuello</option>
+      </select>
+
+      <div class="sub-label">Tipo de Aimbot:</div>
+      <div style="margin-top: 5px;">Ao Olhar</div>
+    </div>
+
+    <!-- Info Tab -->
+    <div class="tab-content" id="tab-info">
+      <div class="status-box" id="statusBox" onclick="toggleStatus()">Status: <span id="statusText">Inativo</span></div>
+      <div class="timer" id="countdown">09:00:00</div>
+    </div>
+  </div>
+
+  <script>
+    const background = document.getElementById('background');
+    for (let i = 0; i < 40; i++) {
+      const x = document.createElement('div');
+      x.className = 'x';
+      x.style.left = Math.random() * 100 + 'vw';
+      x.style.top = Math.random() * 100 + 'vh';
+      x.style.fontSize = (Math.random() * 20 + 10) + 'px';
+      x.style.animationDuration = (Math.random() * 10 + 5) + 's';
+      x.innerText = 'X';
+      background.appendChild(x);
+    }
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    let countdownSeconds = 9 * 60 * 60;
+    let countdownInterval;
+    let countdownStarted = false;
+
+    function toggleStatus() {
+      const box = document.getElementById('statusBox');
+      const text = document.getElementById('statusText');
+      if (box.classList.contains('active')) {
+        box.classList.remove('active');
+        text.innerText = 'Inativo';
+        clearInterval(countdownInterval);
+        countdownStarted = false;
+        countdownSeconds = 9 * 60 * 60;
+        document.getElementById('countdown').innerText = '09:00:00';
+      } else {
+        box.classList.add('active');
+        text.innerText = 'Ativo';
+        if (!countdownStarted) {
+          countdownStarted = true;
+          startCountdown();
+        }
+      }
+    }
+
+    function startCountdown() {
+      countdownInterval = setInterval(() => {
+        if (countdownSeconds > 0) {
+          countdownSeconds--;
+          let hours = Math.floor(countdownSeconds / 3600);
+          let minutes = Math.floor((countdownSeconds % 3600) / 60);
+          let seconds = countdownSeconds % 60;
+          document.getElementById('countdown').innerText =
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        } else {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+    }
+
+    let dpiSensitivity = 2.0;
+    const minDpi = 0.2;
+    function updateDpi(value) {
+      console.log("DPI set to:", value);
+    }
+    function decreaseDpi() {
+      if (dpiSensitivity > minDpi) {
+        dpiSensitivity -= 0.1;
+        updateDpi(dpiSensitivity);
+        console.log("DPI decreased to: " + dpiSensitivity);
+      }
+    }
+    document.getElementById('dpiCheckbox').addEventListener('change', function () {
+      if (this.checked) decreaseDpi();
+    });
+
+    const autoShootToggle = document.getElementById('autoShootToggle');
+    const fireRateSlider = document.getElementById('fireRateSlider');
+    const burstFireToggle = document.getElementById('burstFireToggle');
+    const autoShootSettings = document.getElementById('autoShootSettings');
+    const burstModeContainer = document.getElementById('burstModeContainer');
+
+    autoShootToggle.addEventListener('change', function () {
+      autoShootSettings.style.display = this.checked ? 'block' : 'none';
+      burstModeContainer.style.display = this.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('scopeAimbotToggle').addEventListener('change', function () {
+      console.log(this.checked ? 'Aimbot de Mira ativado' : 'Aimbot de Mira desativado');
+    });
+
+    // Aimbot Core Loop
+    let freeFireAimingInterval = null;
+    function startFreeFireAiming() {
+      if (freeFireAimingInterval) return;
+
+      freeFireAimingInterval = setInterval(() => {
+        const player = { position: { x: 0, y: 0, z: 0 } }; // mock
+        const enemies = [{ position: { x: 3, y: 2, z: 0.5 } }]; // mock
+
+        const playerPos = player.position;
+        enemies.forEach(enemy => {
+          const head = { x: enemy.position.x, y: enemy.position.y, z: enemy.position.z + 0.25 };
+          const direction = {
+            x: head.x - playerPos.x,
+            y: head.y - playerPos.y,
+            z: head.z - playerPos.z
+          };
+
+          const magnitude = Math.sqrt(direction.x**2 + direction.y**2 + direction.z**2);
+          if (magnitude < 100) {
+            const normalized = {
+              x: direction.x / magnitude,
+              y: direction.y / magnitude,
+              z: direction.z / magnitude
+            };
+
+            console.log("Aiming at enemy direction:", normalized);
+
+            if (document.getElementById('autoShootToggle').checked) {
+              const fireRate = parseInt(fireRateSlider.value);
+              const burstMode = burstFireToggle.checked;
+
+              if (burstMode) {
+                for (let i = 0; i < 3; i++) {
+                  setTimeout(() => shoot(), i * 80);
+                }
+              } else {
+                const now = Date.now();
+                if (!window.lastShotTime || now - window.lastShotTime > fireRate) {
+                  shoot();
+                  window.lastShotTime = now;
+                }
+              }
+            }
+          }
+        });
+      }, 50);
+    }
+
+    function stopFreeFireAiming() {
+      clearInterval(freeFireAimingInterval);
+      freeFireAimingInterval = null;
+      console.log('Free Fire MAX aiming stopped');
+    }
+
+    function shoot() {
+      console.log("Bang! Shot fired.");
+    }
+
+    document.getElementById('aimAssistToggle').addEventListener('change', function () {
+      if (this.checked) startFreeFireAiming();
+      else stopFreeFireAiming();
+    });
+  </script>
+</body>
+</html>
